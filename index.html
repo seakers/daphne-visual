@@ -393,13 +393,13 @@ svg.append("g")
     .text("Cost")
 
 // Load initial data
-loadInitialData();
+loadInitialData("lib/EOSS_data.csv");
 
-function loadInitialData() {
+function loadInitialData(dataset) {
 
     plotPoints = [];
 
-    d3.dsv(":")("lib/EOSS_data.csv", function(error, data) {
+    d3.dsv(":")(dataset, function(error, data) {
         data.forEach(function(d) {
             d.science = +d.science;
             d.cost = +d.cost;
@@ -722,15 +722,22 @@ tour.addStep('Welcome 15', {
     advanceOn: '.docs-link click'
 });
 
+// Orbits available in each round
+orbits = ["134","1234","12345"];
+
+// Instruments available in each round
+instruments = ["ABCD", "ABCDEF", "ABCDEFGHIJKL"];
+
 tour.addStep('Round 1', {
     title: 'Round 1',
-    text: ["In this round you will have the following orbits and instruments available:","Orbits: 1, 3, 4", "Instruments: A, B, G, L"],
+    text: ["In this round you will have the following orbits and instruments available:","Orbits: 1, 3, 4", "Instruments: A, B, C, D"],
     attachTo: '.body',
     buttons: [
         {
             text: 'Start',
             action: function() {
-                initRound("134","ABGL");
+                loadInitialData("lib/EOSS_data1.csv");
+                initRound(orbits[0],instruments[0]);
                 registerAction("Round1","");
                 startTimer();
                 return tour.hide();
@@ -748,7 +755,8 @@ tour.addStep('Round 2', {
         {
             text: 'Start',
             action:  function() {
-                initRound("1234","ABCDEF");
+                loadInitialData("lib/EOSS_data2.csv");
+                initRound(orbits[1],instruments[1]);
                 registerAction("Round2","");
                 startTimer(); 
                 return tour.hide();
@@ -766,7 +774,8 @@ tour.addStep('Round 3', {
         {
             text: 'Start',
             action:  function() {
-                initRound("12345","ABCDEFGHIJKL");
+                loadInitialData("lib/EOSS_data3.csv");
+                initRound(orbits[2],instruments[2]);
                 registerAction("Round3","");
                 startTimer(); 
                 return tour.hide();
@@ -801,7 +810,6 @@ function nextRound() {
 }
 
 function initRound(orbits, instruments) {
-    loadInitialData();
     setArchitecture(["","","","",""]);
     displayMessages([["info","Call criticize to show warnings and recomendations"]]);
     if(interval != null) {
