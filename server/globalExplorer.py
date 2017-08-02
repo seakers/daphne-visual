@@ -1,13 +1,13 @@
-from deap import algorithms
-from deap import base
-from deap import creator
-from deap import tools
+from deap import creator, base, tools, algorithms
 import array
 import random
 import json
+import numpy
 from VASSAR import VASSAR
 
 instruments = ['A','B','C','D','E','F','G','H','I','J','K','L']
+
+# ["BC","A","B","C","D"] to [0,1,1,0,0,0...]
 
 def arch_to_array(architecture):
     array = [0] * 60
@@ -17,6 +17,8 @@ def arch_to_array(architecture):
             if instruments[i] in arch[j]:
                 array[i+j*12] = 1
     return array
+
+# [0,1,1,0,0,0...] to ["BC","A","B","C","D"]
 
 def array_to_arch(array):
     arch = '["'
@@ -37,13 +39,13 @@ creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessM
 toolbox = base.Toolbox()
 
 toolbox.register("attr_bool", random.randint, 0, 1)
-
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 60)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evaluate(individual):
     architecture = array_to_arch(individual)
     result = vassar.evaluateArch(architecture)
+    # Maximize only scientific benefit (for the moment)
     return result[0],
 
 toolbox.register("evaluate", evaluate)
@@ -53,13 +55,17 @@ toolbox.register("select", tools.selTournament, tournsize=3)
 
 def main():
     print "globalExplorer"
-    pop = toolbox.population(n=300)
-    hof = tools.HallOfFame(1)
+    population = toolbox.population(n=300)
 
-    pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, 
-                                ngen=40, halloffame=hof, verbose=True)
+    NGEN=40
+    for gen in range(NGEN):
+        offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.1)
+        fits = toolbox.map(toolbox.evaluate, offspring)
+        for fit, ind in zip(fits, offspring):
+            ind.fitness.values = fit
+        population = offspring
 
-    return pop, log, hof
+    return population
 
 if __name__ == '__main__':
     main()
