@@ -45,12 +45,12 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 def evaluate(individual):
     architecture = array_to_arch(individual)
     result = vassar.evaluateArch(architecture)
-    # Maximize only scientific benefit (for the moment)
-    return result[0],
+    # Maximize scientific benefit and minimize cost
+    return result[0],-result[1]
 
 toolbox.register("evaluate", evaluate)
 toolbox.register("mate", tools.cxTwoPoint)
-toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+toolbox.register("mutate", tools.mutFlipBit, indpb=1/60)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
 def main():
